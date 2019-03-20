@@ -35,10 +35,12 @@ int main(void)
     int simulatorPeriod;
     int learningPeriod;
 
+    // =======For manual variable setting=========
     // int numberOfThread = 5;
     // int numberOfSimulator = 1;
     // int simulatorPeriod = 10;
     // int learningPeriod = 10;
+    // ===========================================
 
     // For User input
     printf("Enter the amount of Tachikoma robots :");
