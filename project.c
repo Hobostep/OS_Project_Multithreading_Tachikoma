@@ -4,55 +4,101 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <stdlib.h>
+int T, E, N, M;
+
+#define SEM_FLAG_NAME "/ten9"
+#define SEM_FLAG_NAME2 "/aaaa"
+
+int temp = 0;
+
+sem_t *learn;
+sem_t *nextLoop;
 
 void *learningProcess(void *param)
 {
-    printf("[ %d ] : Here is learning process\n", param);
-    pthread_exit(NULL);
-}
+    int tid = (int)param;
+    temp++;
 
-void initialize(N, M, E, T)
-{
-    int i;
-    pthread_t t[N];
-    // float arrayId[N];
+    sem_wait(learn);
+    printf("[ %d ] IN\n", tid);
+    printf("[ %d ] : Here is learning process\n", tid);
 
-    int indexes[N];
+    sleep(10);
 
-    for (i = 0; i < N; i++)
+    printf("[ %d ] OUT\n", tid);
+    sem_post(learn);
+    if (temp == N)
     {
-        indexes[i] = i;
-        pthread_create(&t[i], NULL, learningProcess, i);
-        pthread_join(t[i], NULL);
+        temp = 0;
+        sem_post(nextLoop);
     }
+
+    return NULL;
 }
 
 int main(void)
 {
-
-    int numberOfThread;
-    int numberOfSimulator;
-    int simulatorPeriod;
-    int learningPeriod;
-
     // =======For manual variable setting=========
-    // int numberOfThread = 5;
-    // int numberOfSimulator = 1;
-    // int simulatorPeriod = 10;
-    // int learningPeriod = 10;
+    int numberOfThread = 6;
+    int numberOfSimulator = 3;
+    int simulatorPeriod = 3;
+    int totalPeriod = 1000;
     // ===========================================
 
-    // For User input
-    printf("Enter the amount of Tachikoma robots :");
-    scanf("%d", &numberOfThread);
-    printf("Enter the amount of Simulator :");
-    scanf("%d", &numberOfSimulator);
-    printf("Enter the maximum period of time that a simulator runs in one playing (in seconds) :");
-    scanf("%d", &simulatorPeriod);
-    printf("Enter the fixed period of time that the whole learning will take :");
-    scanf("%d", &learningPeriod);
+    N = numberOfThread;
+    M = numberOfSimulator;
+    T = totalPeriod;
+    E = simulatorPeriod;
+    printf("[ Variable Set ]\n");
+    printf("[ STARTING ]\n");
+    printf("[ %d Tachikoma Robots]\n", N);
+    printf("[ %d Simulator]\n", M);
 
-    initialize(numberOfThread, numberOfSimulator, simulatorPeriod, learningPeriod);
+    pthread_t t[N];
+    learn = sem_open(SEM_FLAG_NAME, O_CREAT, 0666, M);
+    nextLoop = sem_open(SEM_FLAG_NAME2, O_CREAT, 0666, 1);
+
+    while (1)
+    {
+
+        int i = 0;
+        while (i < N)
+        {
+            pthread_create(&t[i], NULL, learningProcess, (void *)i);
+            i++;
+        }
+        if (i == N)
+        {
+            // printf("Im in");
+            sem_wait(nextLoop);
+            // printf("============================\n");
+        }
+    }
+
+    int i;
+    for (i = 0; i < N; i++)
+    {
+        pthread_join(t[i], NULL);
+    }
+    sem_destroy(&learn);
+    sem_destroy(&nextLoop);
+    printf("[ ENDING ]\n");
 
     return 0;
 }
+
+// For User input
+// int numberOfThread;
+// int numberOfSimulator;
+// int simulatorPeriod;
+// int learningPeriod;
+// printf("Enter the amount of Tachikoma robots :");
+// scanf("%d", &numberOfThread);
+// printf("Enter the amount of Simulator :");
+// scanf("%d", &numberOfSimulator);
+// printf("Enter the maximum period of time that a simulator runs in one playing (in seconds) :");
+// scanf("%d", &simulatorPeriod);
+// printf("Enter the fixed period of time that the whole learning will take :");
+// scanf("%d", &totalPeriod);
