@@ -8,7 +8,7 @@
 #include <stdlib.h>
 int T, E, N, M;
 
-#define SEM_FLAG_NAME "/ten9"
+#define SEM_FLAG_NAME "/learn100"
 #define SEM_FLAG_NAME2 "/aaaa"
 
 int temp = 0;
@@ -60,7 +60,8 @@ int main(void)
     learn = sem_open(SEM_FLAG_NAME, O_CREAT, 0666, M);
     nextLoop = sem_open(SEM_FLAG_NAME2, O_CREAT, 0666, 1);
 
-    while (1)
+    int j = 0;
+    while (j < T)
     {
 
         int i = 0;
@@ -72,9 +73,10 @@ int main(void)
         if (i == N)
         {
             // printf("Im in");
-            sem_wait(nextLoop);
+            // sem_wait(nextLoop);
             // printf("============================\n");
         }
+        j++;
     }
 
     int i;
