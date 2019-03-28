@@ -83,12 +83,14 @@ void *Learn(void *tid)
     while (*check != -1)
     {
         sem_wait(learn);
+
         if (learning[bid] == 0 && learning[nid] == 0)
         {
             learning[id] = 1;
             if (learning[bid] == 1 || learning[nid] == 1)
             {
                 sem_post(learn);
+                learning[id] = 0;
                 continue;
             }
             time = rand() % E + 1;
